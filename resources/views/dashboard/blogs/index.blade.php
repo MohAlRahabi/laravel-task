@@ -3,10 +3,25 @@
     <div class="p-4">
         <div class="pt-2">
             <button
-                class="edit btn btn-xs btn-dark mb-4"
+                class="btn btn-xs btn-dark mb-4"
                 href="javascript:" onclick="openAdd()">
                 <i class="fas fa-plus"></i>
                  Add New Blog
+            </button>
+            <button
+                class="btn btn-xs btn-outline-dark mb-4"
+                type="button"
+                data-toggle="modal" data-target="#advanceSearchModal">
+                <i class="fas fa-search"></i>
+                 Advance Search
+            </button>
+            <button
+                class="btn btn-xs btn-outline-danger mb-4"
+                type="button"
+                id="clearBtn"
+                style="display: none">
+                <i class="fas fa-eraser"></i>
+                Clear Filters
             </button>
         </div>
 
@@ -29,6 +44,9 @@
     @component('dashboard.blogs.form')
     @endcomponent
 
+    @component('dashboard.blogs.advance_search_modal')
+    @endcomponent
+
 @stop
 @push('scripts')
     <script>
@@ -37,7 +55,15 @@
             table = $('#blog_table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: '{!! route('blogs.data') !!}',
+                ajax: {
+                    url: "{{ route('blogs.data') }}",
+                        data: function (d) {
+                            d.adTitle = $('#advanceSearchTitle').val();
+                            d.desc = $('#advanceSearchContent').val();
+                            d.pDate = $('#advanceSearchPublishDate').val();
+                            d.adStatus = $('#advanceSearchStatus').val();
+                    }
+                },
                 lengthMenu : [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
                 dom: 'Blfrtip',
                 fixedHeader: true,
@@ -126,6 +152,21 @@
             deleteOpr(id, `dashboard/blogs/delete_images/` + id, table)
             $('#add-modal').modal('toggle');
             $('#add-modal').find('input[type="file"]').show();
+        })
+        $('#advanceSearchBtn').on('click',function (event) {
+            event.preventDefault();
+            $('#advanceSearchModal').modal('hide');
+            $('#clearBtn').show();
+            table.draw();
+        })
+        $('#clearBtn').on('click',function (event) {
+            event.preventDefault();
+            $('#advanceSearchTitle').val('')
+            $('#advanceSearchContent').val('')
+            $('#advanceSearchPublishDate').val('')
+            $('#advanceSearchStatus').val('')
+            $('#clearBtn').hide();
+            table.draw();
         })
     </script>
 @endpush

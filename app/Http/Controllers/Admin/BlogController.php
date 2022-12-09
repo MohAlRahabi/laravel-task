@@ -13,6 +13,7 @@ use Exception;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -36,10 +37,11 @@ class BlogController extends Controller {
 
     /**
      * return data of all blogs
+     * @param Request $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function data()
+    public function data(Request $request)
     {
         $items = Blog::query()->select('blogs.*');
         return DataTables::eloquent($items)
@@ -47,6 +49,24 @@ class BlogController extends Controller {
                 return '<a class="edit btn btn-xs btn-dark" style="color:#fff"><i class="fas fa-pen"></i> Edit</a>
                         <a class="delete btn btn-xs btn-danger" style="color:#fff"><i class="fas fa-trash"></i> Delete</a>';
             })
+            ->filter(function ($query) use ($request){
+                if($request->has('adTitle') && $request->adTitle ){
+                    $title = $request->adTitle;
+                    $query->where('title',"LIKE","%$title%");
+                }
+                if($request->has('desc') && $request->desc ){
+                    $desc = $request->desc;
+                    $query->where('content',"LIKE","%$desc%");
+                }
+                if($request->has('pDate') && $request->pDate ){
+                    $pDate = $request->pDate;
+                    $query->where('publish_date',"LIKE","%$pDate%");
+                }
+                if($request->has('adStatus') && $request->adStatus ){
+                    $status = $request->adStatus;
+                    $query->where('status',"LIKE","%$status%");
+                }
+            },true)
             ->make(true);
     }
 

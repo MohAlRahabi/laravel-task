@@ -8,6 +8,21 @@
                 <i class="fas fa-plus"></i>
                  Add New Subscriber
             </button>
+            <button
+                class="btn btn-xs btn-outline-dark mb-4"
+                type="button"
+                data-toggle="modal" data-target="#advanceSearchModal">
+                <i class="fas fa-search"></i>
+                Advance Search
+            </button>
+            <button
+                class="btn btn-xs btn-outline-danger mb-4"
+                type="button"
+                id="clearBtn"
+                style="display: none">
+                <i class="fas fa-eraser"></i>
+                Clear Filters
+            </button>
         </div>
 
         <div style="min-height: 300px;">
@@ -28,6 +43,9 @@
     @component('dashboard.users.form')
     @endcomponent
 
+    @component('dashboard.users.advance_search_modal')
+    @endcomponent
+
 @stop
 @push('scripts')
     <script>
@@ -36,7 +54,14 @@
             table = $('#subscribers_table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: '{!! route('subscribers.data') !!}',
+                ajax: {
+                    url: "{{ route('subscribers.data') }}",
+                    data: function (d) {
+                        d.adName = $('#advanceSearchName').val();
+                        d.adUsername = $('#advanceSearchUsername').val();
+                        d.adStatus = $('#advanceSearchStatus').val();
+                    }
+                },
                 lengthMenu : [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
                 dom: 'Blfrtip',
                 fixedHeader: true,
@@ -108,6 +133,21 @@
         $('#add-modal').on('hidden.bs.modal',function (event) {
             $(this).removeClass('in');
             $(this).addClass('out');
+        })
+        $('#advanceSearchBtn').on('click',function (event) {
+            event.preventDefault();
+            $('#advanceSearchModal').modal('hide');
+            $('#clearBtn').show();
+            table.draw();
+        })
+        $('#clearBtn').on('click',function (event) {
+            event.preventDefault();
+            $('#advanceSearchTitle').val('')
+            $('#advanceSearchContent').val('')
+            $('#advanceSearchPublishDate').val('')
+            $('#advanceSearchStatus').val('')
+            $('#clearBtn').hide();
+            table.draw();
         })
     </script>
 @endpush

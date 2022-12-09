@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -31,10 +32,11 @@ class SubscriberController extends Controller {
 
     /**
      * return data of all subscribers
+     * @param Request $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function data()
+    public function data(Request $request)
     {
         $items = User::query()->select('users.*');
         return DataTables::eloquent($items)
@@ -42,6 +44,20 @@ class SubscriberController extends Controller {
                 return '<a class="edit btn btn-xs btn-dark" style="color:#fff"><i class="fas fa-pen"></i> Edit</a>
                         <a class="delete btn btn-xs btn-danger" style="color:#fff"><i class="fas fa-trash"></i> Delete</a>';
             })
+            ->filter(function ($query) use ($request){
+                if($request->has('adName') && $request->adName ){
+                    $name = $request->adName;
+                    $query->where('name',"LIKE","%$name%");
+                }
+                if($request->has('adUsername') && $request->adUsername ){
+                    $username = $request->adUsername;
+                    $query->where('username',"LIKE","%$username%");
+                }
+                if($request->has('adStatus') && $request->adStatus ){
+                    $status = $request->adStatus;
+                    $query->where('status',"LIKE","%$status%");
+                }
+            },true)
             ->make(true);
     }
 
