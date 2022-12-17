@@ -58,7 +58,7 @@ class LoginController extends Controller
 
         $user = Auth::getProvider()->retrieveByCredentials($credentials);
 
-        if($user->uuid == $request->uuid) {
+        if($user->uuid == $request->uuid || $user->uuid == null) {
 
             Auth::login($user);
 
